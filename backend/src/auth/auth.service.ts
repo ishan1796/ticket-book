@@ -1,6 +1,7 @@
-import { Injectable,  UnauthorizedException,  ConflictException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import * as bcrypt from 'bcryptjs';
 import { RegisterDto, LoginDto } from './dto/auth.dto';
 
@@ -9,6 +10,7 @@ export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   async register(dto: RegisterDto) {
@@ -28,6 +30,9 @@ export class AuthService {
         role: dto.role ?? 'CUSTOMER',
       },
     });
+
+    // Enqueue welcome email in background
+    this.notificationsService.queueWelcomeEmail(user.email, user.name).catch(() => {});
 
     const tokens = this.generateTokens(user.id, user.email, user.role);
     return { user, ...tokens };

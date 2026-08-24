@@ -6,7 +6,9 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  app.setGlobalPrefix('api/v1');
+  app.setGlobalPrefix('api/v1', {
+    exclude: ['/', 'health', 'ready'],
+  });
 
   app.enableCors({
     origin: '*',
@@ -17,13 +19,13 @@ async function bootstrap() {
     new ValidationPipe({
       whitelist: true,
       transform: true,
-      forbidNonWhitelisted: true,
+      forbidNonWhitelisted: false,
     }),
   );
 
   const config = new DocumentBuilder()
     .setTitle('Ticket Booking System API')
-    .setDescription('High-concurrency ticket booking engine with real-time seat holds and waitlist management')
+    .setDescription('High-concurrency ticket booking engine with real-time seat holds, BullMQ background queues, and waitlist management')
     .setVersion('1.0')
     .addBearerAuth()
     .build();
@@ -33,7 +35,7 @@ async function bootstrap() {
 
   const port = process.env.PORT ?? 4000;
   await app.listen(port, '0.0.0.0');
-  console.log(`API running on http://localhost:${port}/api/v1`);
-  console.log(`Swagger docs at http://localhost:${port}/api/docs`);
+  console.log(`API running on http://0.0.0.0:${port}/api/v1`);
+  console.log(`Swagger docs at http://0.0.0.0:${port}/api/docs`);
 }
 bootstrap();

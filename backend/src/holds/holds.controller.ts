@@ -1,4 +1,4 @@
-import { Controller, Post, Delete, Get,  Param,  UseGuards,  Req } from '@nestjs/common';
+import { Controller, Post, Delete, Get, Param, UseGuards, Req } from '@nestjs/common';
 import { HoldsService } from './holds.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
@@ -10,6 +10,11 @@ export class HoldsController {
   @Post('seats/:showSeatId/hold')
   async createHold(@Param('showSeatId') showSeatId: string, @Req() req: any) {
     return this.holdsService.createHold(showSeatId, req.user.id);
+  }
+
+  @Get('holds/:holdId')
+  async getHold(@Param('holdId') holdId: string) {
+    return this.holdsService.getHold(holdId);
   }
 
   @UseGuards(JwtAuthGuard)
