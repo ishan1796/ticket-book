@@ -5,6 +5,13 @@ load: two customers can never book the same seat, holds expire reliably,
 cancellations automatically cascade through a real FIFO waitlist, and every
 mutating API is idempotent against retries.
 
+### 🌐 Live Production Deployments
+- **Frontend (Vercel)**: [https://frontend-six-iota-36.vercel.app/](https://frontend-six-iota-36.vercel.app/)
+- **Backend API (Railway)**: [https://ticket-book-production-c815.up.railway.app/](https://ticket-book-production-c815.up.railway.app/)
+- **API Health Check**: [https://ticket-book-production-c815.up.railway.app/health](https://ticket-book-production-c815.up.railway.app/health)
+- **API Documentation (Swagger)**: [https://ticket-book-production-c815.up.railway.app/api/docs](https://ticket-book-production-c815.up.railway.app/api/docs)
+
+
 > **Honesty note for evaluators:** every claim in this document is backed by
 > code in this repo. Where something is a deliberate simplification (e.g. no
 > payment gateway, single-region deployment), it's called out explicitly in
