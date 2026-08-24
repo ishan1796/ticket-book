@@ -1,0 +1,37 @@
+# Environment files (CRITICAL SECURITY)
+.env
+.env.*
+!.env.example
+backend/.env
+backend/.env.*
+!backend/.env.example
+frontend/.env
+frontend/.env.*
+!frontend/.env.example
+
+# Dependencies
+node_modules/
+backend/node_modules/
+frontend/node_modules/
+
+# Build & Compiled artifacts
+dist/
+backend/dist/
+frontend/.next/
+frontend/out/
+build/
+
+# Database / SQLite temporary files
+*.sqlite
+*.sqlite-journal
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+
+# System & OS
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
