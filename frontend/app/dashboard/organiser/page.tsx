@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { api, ApiError } from '@/lib/api';
 import { useAuthStore } from '@/lib/auth-store';
-import { LayoutDashboard, Plus, Calendar, DollarSign, Ticket, Users, Layers, Sparkles, AlertCircle } from 'lucide-react';
+import { LayoutDashboard, Plus, Calendar, DollarSign, Ticket, Users, Layers, Sparkles, AlertCircle, MapPin, Clock, ArrowRight } from 'lucide-react';
 
 interface EventItem {
   id: string;
@@ -43,8 +43,8 @@ export default function OrganiserDashboard() {
   const [selectedEventId, setSelectedEventId] = useState('');
   const [selectedVenueId, setSelectedVenueId] = useState('');
   const [startsAt, setStartsAt] = useState('');
-  const [standardPrice, setStandardPrice] = useState('50');
-  const [premiumPrice, setPremiumPrice] = useState('100');
+  const [standardPrice, setStandardPrice] = useState('450');
+  const [premiumPrice, setPremiumPrice] = useState('950');
   const [creatingShow, setCreatingShow] = useState(false);
 
   const loadData = () => {
@@ -116,69 +116,82 @@ export default function OrganiserDashboard() {
     <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
       <header className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">Organiser Dashboard</h1>
-            <span className="rounded-md bg-indigo-100 px-2 py-0.5 text-xs font-bold text-indigo-700">ORGANISER</span>
+          <div className="flex items-center gap-3">
+            <h1 className="text-3xl font-black tracking-tight text-white">Organiser Studio</h1>
+            <span className="rounded-lg bg-amber-500/15 border border-amber-500/30 px-2.5 py-0.5 text-xs font-extrabold text-amber-300">
+              ORGANISER
+            </span>
           </div>
-          <p className="mt-1 text-sm text-slate-500">Manage events, schedule showtimes, assign venues, and configure seat pricing</p>
+          <p className="mt-1 text-xs text-slate-400">Manage live events, schedule showtimes, assign venues, and configure seat pricing</p>
         </div>
 
         <div className="flex items-center gap-3">
           <button
             onClick={() => setShowEventModal(true)}
-            className="flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-xs font-bold text-white shadow-md hover:bg-indigo-700 transition"
+            className="glow-btn flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 px-4 py-2.5 text-xs font-extrabold text-white shadow-lg shadow-indigo-500/25 hover:from-indigo-600 hover:to-purple-700 transition"
           >
             <Plus className="h-4 w-4" />
             <span>Create Event</span>
           </button>
           <button
             onClick={() => setShowShowModal(true)}
-            className="flex items-center gap-2 rounded-xl border border-indigo-200 bg-indigo-50 px-4 py-2.5 text-xs font-bold text-indigo-700 hover:bg-indigo-100 transition"
+            className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-xs font-bold text-slate-200 hover:bg-white/10 hover:text-white transition"
           >
-            <Calendar className="h-4 w-4" />
-            <span>Create Show</span>
+            <Calendar className="h-4 w-4 text-purple-400" />
+            <span>Schedule Show</span>
           </button>
         </div>
       </header>
 
       {error && (
-        <div className="mb-6 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-xs text-rose-800 flex items-center gap-2">
-          <AlertCircle className="h-4 w-4 text-rose-600 shrink-0" />
+        <div className="mb-6 rounded-2xl border border-rose-500/30 bg-rose-500/10 p-4 text-xs font-semibold text-rose-300 flex items-center gap-2">
+          <AlertCircle className="h-4 w-4 text-rose-400 shrink-0" />
           <span>{error}</span>
         </div>
       )}
 
       {/* KPI Cards */}
       <div className="mb-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-        <KpiCard icon={<Layers className="h-5 w-5 text-indigo-600" />} label="Total Events" value={events.length} />
-        <KpiCard icon={<Calendar className="h-5 w-5 text-purple-600" />} label="Active Shows" value={totalShows} />
-        <KpiCard icon={<Users className="h-5 w-5 text-emerald-600" />} label="Venues Available" value={venues.length} />
-        <KpiCard icon={<DollarSign className="h-5 w-5 text-amber-600" />} label="System Status" value="ACTIVE" />
+        <KpiCard icon={<Layers className="h-5 w-5 text-indigo-400" />} label="Total Events" value={events.length} />
+        <KpiCard icon={<Calendar className="h-5 w-5 text-purple-400" />} label="Active Shows" value={totalShows} />
+        <KpiCard icon={<Users className="h-5 w-5 text-emerald-400" />} label="Venues Available" value={venues.length} />
+        <KpiCard icon={<DollarSign className="h-5 w-5 text-amber-400" />} label="System Status" value="ACTIVE" />
       </div>
 
-      {/* Events Table */}
-      <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-        <div className="border-b border-slate-100 bg-slate-50/50 px-6 py-4">
-          <h2 className="font-bold text-slate-900">Your Managed Events</h2>
+      {/* Managed Events Panel */}
+      <div className="glass-card overflow-hidden rounded-3xl border border-white/10 shadow-2xl">
+        <div className="border-b border-white/5 bg-slate-950/60 px-6 py-4 flex items-center justify-between">
+          <h2 className="font-extrabold text-white text-base">Your Managed Events & Shows</h2>
+          <span className="text-xs font-semibold text-slate-400">{events.length} events registered</span>
         </div>
 
         {loading ? (
-          <div className="p-8 text-center text-slate-400">Loading events...</div>
+          <div className="p-12 text-center text-slate-400 font-medium">Loading events...</div>
         ) : events.length === 0 ? (
-          <div className="p-8 text-center text-slate-400">No events created yet. Click "Create Event" to begin.</div>
+          <div className="p-12 text-center text-slate-400 space-y-3">
+            <p className="text-sm font-bold text-white">No events created yet.</p>
+            <p className="text-xs text-slate-500">Click "Create Event" above to publish your first movie or concert.</p>
+          </div>
         ) : (
-          <div className="divide-y divide-slate-100">
+          <div className="divide-y divide-white/5">
             {events.map((ev) => (
-              <div key={ev.id} className="p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-slate-50/50 transition">
-                <div>
+              <div key={ev.id} className="p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-white/5 transition">
+                <div className="space-y-1.5">
                   <div className="flex items-center gap-2">
-                    <h3 className="font-bold text-slate-900 text-lg">{ev.title}</h3>
-                    <span className="rounded-full bg-indigo-50 px-2.5 py-0.5 text-[11px] font-bold text-indigo-700">{ev.type}</span>
-                    <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700">{ev.status}</span>
+                    <h3 className="font-black text-white text-lg">{ev.title}</h3>
+                    <span className="rounded-lg bg-indigo-500/15 border border-indigo-500/30 px-2.5 py-0.5 text-[10px] font-extrabold text-indigo-300">
+                      {ev.type}
+                    </span>
+                    <span className="rounded-lg bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 text-[10px] font-extrabold text-emerald-300">
+                      ● {ev.status}
+                    </span>
                   </div>
 
-                  <div className="mt-2 flex flex-wrap gap-3 text-xs text-slate-500">
+                  <div className="flex flex-wrap gap-4 text-xs text-slate-400 font-medium">
                     <span>{ev.shows?.length || 0} scheduled showtimes</span>
+                    {ev.shows && ev.shows.length > 0 && (
+                      <span className="text-slate-500">• Next at {ev.shows[0].venue.name}</span>
+                    )}
                   </div>
                 </div>
 
@@ -188,9 +201,10 @@ export default function OrganiserDashboard() {
                       setSelectedEventId(ev.id);
                       setShowShowModal(true);
                     }}
-                    className="rounded-xl border border-slate-200 px-3.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition"
+                    className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-xs font-bold text-slate-200 hover:bg-indigo-600 hover:border-indigo-500 hover:text-white transition"
                   >
-                    Add Show
+                    <Plus className="h-3.5 w-3.5" />
+                    <span>Add Show</span>
                   </button>
                 </div>
               </div>
@@ -201,57 +215,64 @@ export default function OrganiserDashboard() {
 
       {/* Create Event Modal */}
       {showEventModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-xs">
-          <form onSubmit={handleCreateEvent} className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl space-y-4">
-            <h3 className="text-lg font-bold text-slate-900">Create New Event</h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-md">
+          <form onSubmit={handleCreateEvent} className="glass-card w-full max-w-md rounded-3xl border border-white/10 p-7 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-black text-white">Create New Event</h3>
+              <span className="text-xs font-semibold text-indigo-400">Step 1 of 2</span>
+            </div>
+
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">Title</label>
+              <label className="block text-xs font-bold text-slate-300 mb-1.5">Event Title</label>
               <input
                 required
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="e.g. Coldplay World Tour"
-                className="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm focus:border-indigo-500 focus:outline-none"
+                placeholder="e.g. Coldplay Music of the Spheres"
+                className="w-full rounded-xl bg-slate-900/90 border border-white/10 px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition"
               />
             </div>
+
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">Event Type</label>
+              <label className="block text-xs font-bold text-slate-300 mb-1.5">Event Category</label>
               <select
                 value={type}
                 onChange={(e) => setType(e.target.value)}
-                className="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm focus:border-indigo-500 focus:outline-none"
+                className="w-full rounded-xl bg-slate-900 border border-white/10 px-3.5 py-2.5 text-sm text-white focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition"
               >
-                <option value="MOVIE">MOVIE</option>
-                <option value="CONCERT">CONCERT</option>
-                <option value="THEATRE">THEATRE</option>
-                <option value="SPORTS">SPORTS</option>
+                <option value="MOVIE" className="bg-slate-900 text-white">🍿 MOVIE</option>
+                <option value="CONCERT" className="bg-slate-900 text-white">🎸 CONCERT</option>
+                <option value="THEATRE" className="bg-slate-900 text-white">🎭 THEATRE & STANDUP</option>
+                <option value="SPORTS" className="bg-slate-900 text-white">🏎️ SPORTS</option>
               </select>
             </div>
+
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">Description</label>
+              <label className="block text-xs font-bold text-slate-300 mb-1.5">Description</label>
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 rows={3}
-                placeholder="Event description..."
-                className="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm focus:border-indigo-500 focus:outline-none"
+                placeholder="Brief summary of the live experience..."
+                className="w-full rounded-xl bg-slate-900/90 border border-white/10 px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition"
               />
             </div>
-            <div className="flex gap-2 pt-2">
+
+            <div className="flex gap-3 pt-2">
               <button
                 type="button"
                 onClick={() => setShowEventModal(false)}
-                className="flex-1 rounded-xl border border-slate-200 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-50 transition"
+                className="flex-1 rounded-xl border border-white/10 bg-white/5 py-2.5 text-xs font-bold text-slate-300 hover:bg-white/10 transition"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={creatingEvent}
-                className="flex-1 rounded-xl bg-indigo-600 py-2.5 text-xs font-bold text-white shadow-md hover:bg-indigo-700 transition disabled:opacity-50"
+                className="glow-btn flex-1 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 py-2.5 text-xs font-extrabold text-white shadow-lg shadow-indigo-500/25 hover:from-indigo-600 hover:to-purple-700 transition disabled:opacity-50"
               >
-                {creatingEvent ? 'Creating...' : 'Create & Publish'}
+                {creatingEvent ? 'Publishing...' : 'Create & Publish'}
               </button>
             </div>
           </form>
@@ -260,86 +281,89 @@ export default function OrganiserDashboard() {
 
       {/* Create Show Modal */}
       {showShowModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-xs">
-          <form onSubmit={handleCreateShow} className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl space-y-4">
-            <h3 className="text-lg font-bold text-slate-900">Schedule New Show</h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-md">
+          <form onSubmit={handleCreateShow} className="glass-card w-full max-w-md rounded-3xl border border-white/10 p-7 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-black text-white">Schedule Showtime</h3>
+              <span className="text-xs font-semibold text-purple-400">Step 2 of 2</span>
+            </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">Select Event</label>
+              <label className="block text-xs font-bold text-slate-300 mb-1.5">Select Event</label>
               <select
                 required
                 value={selectedEventId}
                 onChange={(e) => setSelectedEventId(e.target.value)}
-                className="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm focus:border-indigo-500 focus:outline-none"
+                className="w-full rounded-xl bg-slate-900 border border-white/10 px-3.5 py-2.5 text-sm text-white focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition"
               >
-                <option value="">-- Select Event --</option>
+                <option value="" className="bg-slate-900 text-slate-400">-- Select Event --</option>
                 {events.map((ev) => (
-                  <option key={ev.id} value={ev.id}>{ev.title}</option>
+                  <option key={ev.id} value={ev.id} className="bg-slate-900 text-white">{ev.title}</option>
                 ))}
               </select>
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">Select Venue</label>
+              <label className="block text-xs font-bold text-slate-300 mb-1.5">Select Venue</label>
               <select
                 required
                 value={selectedVenueId}
                 onChange={(e) => setSelectedVenueId(e.target.value)}
-                className="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm focus:border-indigo-500 focus:outline-none"
+                className="w-full rounded-xl bg-slate-900 border border-white/10 px-3.5 py-2.5 text-sm text-white focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition"
               >
-                <option value="">-- Select Venue --</option>
+                <option value="" className="bg-slate-900 text-slate-400">-- Select Venue --</option>
                 {venues.map((vn) => (
-                  <option key={vn.id} value={vn.id}>{vn.name} ({vn.city})</option>
+                  <option key={vn.id} value={vn.id} className="bg-slate-900 text-white">{vn.name} ({vn.city})</option>
                 ))}
               </select>
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">Start Time</label>
+              <label className="block text-xs font-bold text-slate-300 mb-1.5">Start Date & Time</label>
               <input
                 required
                 type="datetime-local"
                 value={startsAt}
                 onChange={(e) => setStartsAt(e.target.value)}
-                className="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm focus:border-indigo-500 focus:outline-none"
+                className="w-full rounded-xl bg-slate-900/90 border border-white/10 px-3.5 py-2.5 text-sm text-white focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition"
               />
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">STANDARD Price (₹)</label>
+                <label className="block text-xs font-bold text-slate-300 mb-1.5">STANDARD (₹)</label>
                 <input
                   required
                   type="number"
                   value={standardPrice}
                   onChange={(e) => setStandardPrice(e.target.value)}
-                  className="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm focus:border-indigo-500 focus:outline-none"
+                  className="w-full rounded-xl bg-slate-900/90 border border-white/10 px-3.5 py-2.5 text-sm text-white focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition"
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">PREMIUM Price (₹)</label>
+                <label className="block text-xs font-bold text-slate-300 mb-1.5">PREMIUM / VIP (₹)</label>
                 <input
                   required
                   type="number"
                   value={premiumPrice}
                   onChange={(e) => setPremiumPrice(e.target.value)}
-                  className="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm focus:border-indigo-500 focus:outline-none"
+                  className="w-full rounded-xl bg-slate-900/90 border border-white/10 px-3.5 py-2.5 text-sm text-white focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition"
                 />
               </div>
             </div>
 
-            <div className="flex gap-2 pt-2">
+            <div className="flex gap-3 pt-2">
               <button
                 type="button"
                 onClick={() => setShowShowModal(false)}
-                className="flex-1 rounded-xl border border-slate-200 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-50 transition"
+                className="flex-1 rounded-xl border border-white/10 bg-white/5 py-2.5 text-xs font-bold text-slate-300 hover:bg-white/10 transition"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={creatingShow}
-                className="flex-1 rounded-xl bg-indigo-600 py-2.5 text-xs font-bold text-white shadow-md hover:bg-indigo-700 transition disabled:opacity-50"
+                className="glow-btn flex-1 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 py-2.5 text-xs font-extrabold text-white shadow-lg shadow-indigo-500/25 hover:from-indigo-600 hover:to-purple-700 transition disabled:opacity-50"
               >
                 {creatingShow ? 'Scheduling...' : 'Schedule Show'}
               </button>
@@ -353,11 +377,11 @@ export default function OrganiserDashboard() {
 
 function KpiCard({ icon, label, value }: { icon: React.ReactNode; label: string; value: string | number }) {
   return (
-    <div className="flex items-center gap-4 rounded-3xl border border-slate-200 bg-white p-5 shadow-xs">
-      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100">{icon}</div>
+    <div className="glass-card flex items-center gap-4 rounded-3xl border border-white/10 p-5 shadow-xl transition hover:border-indigo-500/30">
+      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/5 border border-white/10">{icon}</div>
       <div>
-        <span className="block text-xs font-semibold text-slate-400">{label}</span>
-        <span className="text-xl font-extrabold text-slate-900">{value}</span>
+        <span className="block text-xs font-bold text-slate-400">{label}</span>
+        <span className="text-xl font-black text-white">{value}</span>
       </div>
     </div>
   );
