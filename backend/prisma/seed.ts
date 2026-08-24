@@ -1,10 +1,11 @@
 import { PrismaClient, UserRole, SeatStatus } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
+import { INDIAN_SHOWCASE_VENUES } from '../src/venues/venues.service';
 
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('Seeding database...');
+  console.log('Seeding database with Indian venues and showcase events...');
 
   const passwordHash = await bcrypt.hash('Password123!', 10);
 
@@ -41,25 +42,32 @@ async function main() {
     },
   });
 
-  const venue = await prisma.venue.create({
-    data: {
-      name: 'Grand Arena',
-      location: 'Downtown Tech Hub',
-      address: '100 Innovation Way',
-      totalCapacity: 100,
-      rows: 10,
-      cols: 10,
-    },
-  });
+  // Seed all 24 Indian venues
+  const createdVenues = [];
+  for (const v of INDIAN_SHOWCASE_VENUES) {
+    const venue = await prisma.venue.create({
+      data: {
+        name: v.name,
+        location: v.location,
+        address: v.address,
+        totalCapacity: v.totalCapacity,
+        rows: v.rows,
+        cols: v.cols,
+      },
+    });
+    createdVenues.push(venue);
+  }
 
+  // Seed showcase live event
+  const primaryVenue = createdVenues[0];
   const event = await prisma.event.create({
     data: {
-      title: 'Grand Concert 2026',
-      description: 'The ultimate live musical experience.',
+      title: 'Coldplay: Music of the Spheres World Tour',
+      description: 'An ethereal night of celestial lights, immersive wristbands, and timeless anthems live in Mumbai.',
       category: 'Concert',
-      posterUrl: 'https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=800&q=80',
+      posterUrl: 'https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?w=800&q=80',
       organiserId: organiser.id,
-      venueId: venue.id,
+      venueId: primaryVenue.id,
     },
   });
 
@@ -73,7 +81,7 @@ async function main() {
       endTime,
       totalSeats: 100,
       availableSeats: 100,
-      price: 150.0,
+      price: 4500.0,
     },
   });
 
@@ -88,7 +96,7 @@ async function main() {
         col: c,
         seatNumber: `${r}${c}`,
         category: r === 'A' || r === 'B' ? 'VIP' : 'STANDARD',
-        price: r === 'A' || r === 'B' ? 250.0 : 150.0,
+        price: r === 'A' || r === 'B' ? 9500.0 : 4500.0,
         status: SeatStatus.AVAILABLE,
       });
     }
@@ -98,7 +106,7 @@ async function main() {
     data: seatData,
   });
 
-  console.log('Seeding completed successfully!');
+  console.log(`Seeding completed successfully with ${createdVenues.length} Indian venues!`);
 }
 
 main()

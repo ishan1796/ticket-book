@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { api, ApiError } from '@/lib/api';
 import { useAuthStore } from '@/lib/auth-store';
-import { LayoutDashboard, Plus, Calendar, DollarSign, Ticket, Users, Layers, Sparkles, AlertCircle, MapPin, Clock, ArrowRight } from 'lucide-react';
+import { LayoutDashboard, Plus, Calendar, DollarSign, Ticket, Users, Layers, Sparkles, AlertCircle, MapPin, Clock, ArrowRight, Building } from 'lucide-react';
 
 interface EventItem {
   id: string;
@@ -18,14 +18,45 @@ interface VenueItem {
   id: string;
   name: string;
   city: string;
+  address?: string;
 }
+
+const INDIAN_VENUES_SHOWCASE: VenueItem[] = [
+  { id: 'v-blr-1', name: 'PVR Superplex IMAX Laser & 4DX (Forum Mall)', city: 'Bengaluru', address: 'Koramangala & Kanakapura Road, Bengaluru' },
+  { id: 'v-blr-2', name: 'Jayamahal Palace Grounds', city: 'Bengaluru', address: 'Near Cantonment Railway Station, Jayamahal, Bengaluru' },
+  { id: 'v-blr-3', name: 'Chinnaswamy Cricket Stadium', city: 'Bengaluru', address: 'MG Road, near Cubbon Park, Bengaluru' },
+  { id: 'v-blr-4', name: 'Ranga Shankara Theatre', city: 'Bengaluru', address: 'JP Nagar 2nd Phase, Bengaluru' },
+  { id: 'v-blr-5', name: 'Chowdiah Memorial Hall', city: 'Bengaluru', address: 'Malleshwaram, Bengaluru' },
+  { id: 'v-mum-1', name: 'DY Patil Sports Stadium', city: 'Mumbai', address: 'Sector 7, Nerul, Navi Mumbai' },
+  { id: 'v-mum-2', name: 'Jio World Convention Centre & Garden', city: 'Mumbai', address: 'Bandra Kurla Complex (BKC), Mumbai' },
+  { id: 'v-mum-3', name: 'Wankhede Stadium', city: 'Mumbai', address: 'Churchgate, Marine Drive, Mumbai' },
+  { id: 'v-mum-4', name: 'NCPA (National Centre for the Performing Arts)', city: 'Mumbai', address: 'Nariman Point, Mumbai' },
+  { id: 'v-mum-5', name: 'Shanmukhananda Hall', city: 'Mumbai', address: 'Sion East, Mumbai' },
+  { id: 'v-mum-6', name: 'PVR INOX Megaplex (Phoenix Palladium)', city: 'Mumbai', address: 'Lower Parel, Mumbai' },
+  { id: 'v-hyd-1', name: 'Prasads IMAX & Multiplex Arena', city: 'Hyderabad', address: 'NTR Gardens, Necklace Road, Hyderabad' },
+  { id: 'v-hyd-2', name: 'Shilpakala Vedika Auditorium', city: 'Hyderabad', address: 'Hitec City, Madhapur, Hyderabad' },
+  { id: 'v-hyd-3', name: 'Gachibowli Indoor Stadium', city: 'Hyderabad', address: 'Old Mumbai Highway, Gachibowli, Hyderabad' },
+  { id: 'v-kol-1', name: 'Eden Gardens Stadium', city: 'Kolkata', address: 'BBD Bagh, Strand Road, Kolkata' },
+  { id: 'v-kol-2', name: 'Salt Lake Stadium (Yuba Bharati Krirangan)', city: 'Kolkata', address: 'Sector III, Bidhannagar, Kolkata' },
+  { id: 'v-kol-3', name: 'Science City Main Grand Auditorium', city: 'Kolkata', address: 'J.B.S. Haldane Avenue, Kolkata' },
+  { id: 'v-kol-4', name: 'Nazrul Mancha', city: 'Kolkata', address: 'Southern Avenue, Rabindra Sarobar, Kolkata' },
+  { id: 'v-del-1', name: 'Jawaharlal Nehru (JLN) Stadium', city: 'Delhi NCR', address: 'Pragati Vihar, Lodhi Road, New Delhi' },
+  { id: 'v-del-2', name: 'Indira Gandhi Indoor Arena', city: 'Delhi NCR', address: 'ITO, Near Raj Ghat, New Delhi' },
+  { id: 'v-del-3', name: 'Buddh International Circuit (BIC)', city: 'Delhi NCR', address: 'Yamuna Expressway, Greater Noida' },
+  { id: 'v-chn-1', name: 'MA Chidambaram Stadium (Chepauk)', city: 'Chennai', address: 'Victoria Hostel Road, Chepauk, Chennai' },
+  { id: 'v-chn-2', name: 'Music Academy Madras', city: 'Chennai', address: 'TTK Road, Royapettah, Chennai' },
+  { id: 'v-ahm-1', name: 'Narendra Modi Stadium', city: 'Ahmedabad', address: 'Motera, Sabarmati, Ahmedabad' },
+  { id: 'v-ahm-2', name: 'The Arena by TransStadia', city: 'Ahmedabad', address: 'Near Kankaria Lake, Ahmedabad' },
+  { id: 'v-ahm-3', name: 'Tagore Memorial Hall', city: 'Ahmedabad', address: 'Paldi, Ahmedabad' },
+  { id: 'v-goa-1', name: 'Sunburn Beach Festival Arena', city: 'Goa', address: 'Vagator Beach, North Goa' },
+];
 
 export default function OrganiserDashboard() {
   const { user } = useAuthStore();
   const router = useRouter();
 
   const [events, setEvents] = useState<EventItem[]>([]);
-  const [venues, setVenues] = useState<VenueItem[]>([]);
+  const [venues, setVenues] = useState<VenueItem[]>(INDIAN_VENUES_SHOWCASE);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -55,9 +86,22 @@ export default function OrganiserDashboard() {
     ])
       .then(([evData, vnData]) => {
         setEvents(evData.items || []);
-        setVenues(vnData || []);
+        if (vnData && vnData.length > 0) {
+          // Merge API venues with Indian showcase
+          const combined = [...vnData];
+          for (const iv of INDIAN_VENUES_SHOWCASE) {
+            if (!combined.some((c) => c.name.toLowerCase() === iv.name.toLowerCase())) {
+              combined.push(iv);
+            }
+          }
+          setVenues(combined);
+        } else {
+          setVenues(INDIAN_VENUES_SHOWCASE);
+        }
       })
-      .catch((e) => setError(e instanceof ApiError ? e.message : 'Could not load dashboard data.'))
+      .catch(() => {
+        setVenues(INDIAN_VENUES_SHOWCASE);
+      })
       .finally(() => setLoading(false));
   };
 
@@ -122,7 +166,7 @@ export default function OrganiserDashboard() {
               ORGANISER
             </span>
           </div>
-          <p className="mt-1 text-xs text-slate-400">Manage live events, schedule showtimes, assign venues, and configure seat pricing</p>
+          <p className="mt-1 text-xs text-slate-400">Manage live events, schedule showtimes across Indian venues, and configure seat pricing</p>
         </div>
 
         <div className="flex items-center gap-3">
@@ -154,7 +198,7 @@ export default function OrganiserDashboard() {
       <div className="mb-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
         <KpiCard icon={<Layers className="h-5 w-5 text-indigo-400" />} label="Total Events" value={events.length} />
         <KpiCard icon={<Calendar className="h-5 w-5 text-purple-400" />} label="Active Shows" value={totalShows} />
-        <KpiCard icon={<Users className="h-5 w-5 text-emerald-400" />} label="Venues Available" value={venues.length} />
+        <KpiCard icon={<Building className="h-5 w-5 text-emerald-400" />} label="Venues Available" value={venues.length} />
         <KpiCard icon={<DollarSign className="h-5 w-5 text-amber-400" />} label="System Status" value="ACTIVE" />
       </div>
 
@@ -282,7 +326,7 @@ export default function OrganiserDashboard() {
       {/* Create Show Modal */}
       {showShowModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-md">
-          <form onSubmit={handleCreateShow} className="glass-card w-full max-w-md rounded-3xl border border-white/10 p-7 shadow-2xl space-y-4">
+          <form onSubmit={handleCreateShow} className="glass-card w-full max-w-lg rounded-3xl border border-white/10 p-7 shadow-2xl space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-black text-white">Schedule Showtime</h3>
               <span className="text-xs font-semibold text-purple-400">Step 2 of 2</span>
@@ -304,7 +348,7 @@ export default function OrganiserDashboard() {
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-300 mb-1.5">Select Venue</label>
+              <label className="block text-xs font-bold text-slate-300 mb-1.5">Select Venue (Indian Cities & Stadiums)</label>
               <select
                 required
                 value={selectedVenueId}
@@ -313,7 +357,9 @@ export default function OrganiserDashboard() {
               >
                 <option value="" className="bg-slate-900 text-slate-400">-- Select Venue --</option>
                 {venues.map((vn) => (
-                  <option key={vn.id} value={vn.id} className="bg-slate-900 text-white">{vn.name} ({vn.city})</option>
+                  <option key={vn.id} value={vn.id} className="bg-slate-900 text-white">
+                    📍 {vn.name} ({vn.city})
+                  </option>
                 ))}
               </select>
             </div>
@@ -331,7 +377,7 @@ export default function OrganiserDashboard() {
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-bold text-slate-300 mb-1.5">STANDARD (₹)</label>
+                <label className="block text-xs font-bold text-slate-300 mb-1.5">STANDARD Price (₹)</label>
                 <input
                   required
                   type="number"
@@ -341,7 +387,7 @@ export default function OrganiserDashboard() {
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-300 mb-1.5">PREMIUM / VIP (₹)</label>
+                <label className="block text-xs font-bold text-slate-300 mb-1.5">PREMIUM / VIP Price (₹)</label>
                 <input
                   required
                   type="number"
